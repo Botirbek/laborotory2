@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -16,7 +18,10 @@ class _ToyCarPageState extends State<Lab5P> {
   double X = -2;
   double Y = 1;
   double count = 0;
+  double count1 = 0;
+  Timer? timer;
   bool isTop = false;
+  bool isStopped = false;
   bool isReachedSecond = false;
   bool isFirstPassed = false;
   bool isSecondPassed = false;
@@ -28,12 +33,12 @@ class _ToyCarPageState extends State<Lab5P> {
       appBar: AppBar(
         title: Text('Toy Car'),
       ),
-      body: Container(
+      body: SizedBox(
         width: 1000,
         child: Stack(
           children: [
             Text(
-              'Tilt Angle: $rotationAngle, $distance, $X, $Y',
+              'Tilt Angle: $rotationAngle, $distance, $X, $Y ,  $count1',
               style: TextStyle(fontSize: 18),
             ),
             Container(
@@ -76,67 +81,76 @@ class _ToyCarPageState extends State<Lab5P> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            if (!isFirstPassed) {
-              if (!isTop) {
-                rotationAngle += 0.01;
-                distance = -rotationAngle * 100;
-                X = distance;
-                Y = 0;
-                if (rotationAngle > 0.05) {
-                  isTop = true;
-                }
-              } else {
-                count += 1;
-                rotationAngle -= 0.01;
-                distance = -rotationAngle * 100 - 0.05 * (count * 100);
-                Y = 0;
-                if (rotationAngle < 0) {
-                  isFirstPassed = true;
-                  count = 0;
-                }
-              }
-            } else if(!isReachedSecond){
-               if (count < 7) {
-                 distance = distance - 8;
-                 count += 1;
-               }else{
-                 isReachedSecond = true;
-                 isTop = false;
-               }
-            }
-
-            if (!isSecondPassed && isReachedSecond){
-              if (!isTop) {
-                rotationAngle -= 0.02;
-                distance = distance + rotationAngle * 100;
-                X = distance;
-                Y = 0;
-                if (rotationAngle <-0.05) {
-                  isTop = true;
-                }
-              } else {
-                count += 1;
-                rotationAngle += 0.02;
-                distance = distance + rotationAngle * 100;
-                Y = 0;
-                if (rotationAngle > 0) {
-                  isSecondPassed = true;
-                  count = 0;
-                }
-              }
-            } else{
-              if (count < 7) {
-                distance = distance - 8;
-                count += 1;
-              }
-            }
-
-          });
+        onPressed: () async {
+          while (count1<30) {
+            await Future.delayed(const Duration(milliseconds: 100));
+            setState(()  {
+                count1 += 1;
+                play();
+            });
+          }
         },
         child: Icon(Icons.arrow_upward),
       ),
     );
   }
+  void play(){
+    if (!isFirstPassed) {
+      if (!isTop) {
+        rotationAngle += 0.01;
+        distance = -rotationAngle * 100;
+        X = distance;
+        Y = 0;
+        if (rotationAngle > 0.05) {
+          isTop = true;
+        }
+      } else {
+        count += 1;
+        rotationAngle -= 0.01;
+        distance = -rotationAngle * 100 - 0.05 * (count * 100);
+        Y = 0;
+        if (rotationAngle < 0) {
+          isFirstPassed = true;
+          count = 0;
+        }
+      }
+    } else if (!isReachedSecond) {
+      if (count < 7) {
+        distance = distance - 8;
+        count += 1;
+      } else {
+        isReachedSecond = true;
+        isTop = false;
+      }
+    }
+
+    if (!isSecondPassed && isReachedSecond) {
+      if (!isTop) {
+        rotationAngle -= 0.02;
+        distance = distance + rotationAngle * 200;
+        X = distance;
+        Y = 0;
+        if (rotationAngle < -0.05) {
+          isTop = true;
+        }
+      } else {
+        count += 1;
+        rotationAngle += 0.02;
+        distance = distance + rotationAngle * 200;
+        Y = 0;
+        if (rotationAngle >= 0) {
+          isSecondPassed = true;
+          count = 0;
+        }
+      }
+    } else {
+      if (count < 7) {
+        distance = distance - 8;
+        count += 1;
+      }
+      isStopped = true;
+    }
+  }
 }
+
+
