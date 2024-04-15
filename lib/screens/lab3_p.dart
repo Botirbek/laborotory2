@@ -32,6 +32,9 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
   bool isReachedSecond = false;
   bool isFirstPassed = false;
   bool isSecondPassed = false;
+  bool isFrintWheel = true;
+
+  final List<bool> isSelected = <bool>[true, false];
 
   TextEditingController m1 = TextEditingController();
   TextEditingController m2 = TextEditingController();
@@ -99,7 +102,6 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
             fit: BoxFit.fill,
           ),
         ),
-
         Positioned(
           top: getConfigHeight(0.202),
           left: getConfigWidth(0.355),
@@ -109,7 +111,6 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
             height: getConfigHeight(0.005),
           ),
         ),
-
         Positioned(
           top: getConfigHeight(0.167),
           left: getConfigWidth(0.12),
@@ -123,10 +124,9 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
             ),
           ),
         ),
-
         Positioned(
           top: getConfigHeight(0.1),
-          left: getConfigWidth(0.35),
+          left: isFrintWheel ? getConfigWidth(0.347) : getConfigWidth(0.265),
           child: Transform.rotate(
             angle: rotationAngle,
             origin: Offset(X, Y),
@@ -137,7 +137,6 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
                     Image.asset('assets/truckL.png', width: 200, height: 100)),
           ),
         ),
-
         Positioned(
           top: getConfigHeight(0.3),
           left: getConfigWidth(0.0245),
@@ -151,7 +150,6 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
             ),
           ),
         ),
-
         Positioned(
           top: getConfigHeight(0.24),
           left: getConfigWidth(0.065),
@@ -177,6 +175,41 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Row(
+            children: [
+              SizedBox(
+                width: getConfigWidth(0.18),
+                child: const Text(
+                  'To''siqning joylashuvi',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              ToggleButtons(
+                  borderRadius: const BorderRadius.all(Radius.circular(15)),
+                  selectedColor: Colors.white,
+                  fillColor: Colors.green,
+                  color: Colors.black,
+                  constraints: const BoxConstraints(
+                    minHeight: 40.0,
+                    minWidth: 80.0,
+                  ),
+                  isSelected: isSelected,
+                  onPressed: (int index) {
+                    setState(() {
+                        isFrintWheel = index == 0;
+                        for (int i = 0; i < isSelected.length; i++) {
+                          isSelected[i] = i == index;
+                        }
+                    });
+                  },
+                  children: const [
+                    Text(' Yetaklovchi '),
+                    Text(' Yetaklanovchi '),
+                  ]),
+            ],
+          ),
           formula(
             text: 'Аvtomobilning oldingi gʼildiraklaridagi massasi',
             symbol: 'assets/mk.png',
@@ -227,7 +260,6 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
           SizedBox(
             height: getConfigHeight(0.1),
           ),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -240,22 +272,13 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
                     var ht = double.parse(m3.text.isNotEmpty ? m3.text : '0');
                     var n4 = double.parse(m4.text.isNotEmpty ? m4.text : '0');
 
-                    result =
-                        (mk * 9.81 * sqrt((2 * rk * ht - pow(ht, 2)) / (rk - ht)))
-                            .toStringAsFixed(3);
+                    result = (mk *
+                            9.81 *
+                            sqrt((2 * rk * ht - pow(ht, 2)) / (rk - ht)))
+                        .toStringAsFixed(3);
                   });
 
-                  while (count1 < 28) {
-                    // print('c = $count1');
-                    await Future.delayed(const Duration(milliseconds: 100));
-                    setState(() {
-                      count1 += 1;
-                      My += 2;
-                      Rx -= 0.01;
-                      Ry += 0.07;
-                      play();
-                    });
-                  }
+                  isFrintWheel ? playTruck1() : playTruck2();
 
                   // controller.forward();
                 },
@@ -274,7 +297,6 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
                   ),
                 ),
               ),
-
               OutlinedButton(
                 onPressed: () async {
                   // print('pressed');
@@ -319,61 +341,114 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
     );
   }
 
-  void play() {
-    if (!isFirstPassed) {
-      if (!isTop) {
-        rotationAngle += 0.01;
-        distance = -rotationAngle * 100;
-        X = distance;
-        Y = 0;
-        if (rotationAngle > 0.05) {
-          isTop = true;
-        }
-      } else {
-        count += 1;
-        rotationAngle -= 0.01;
-        distance = -rotationAngle * 100 - 0.05 * (count * 100);
-        Y = 0;
-        if (rotationAngle < 0) {
-          isFirstPassed = true;
-          count = 0;
-        }
-      }
-    } else if (!isReachedSecond) {
-      if (count < 7) {
-        distance = distance - 8;
-        count += 1;
-      } else {
-        isReachedSecond = true;
-        isTop = false;
-      }
-    }
+  void playTruck2() async {
+    while (count1 < 10) {
+      // print('c = $count1');
+      await Future.delayed(const Duration(milliseconds: 100));
+      setState(() {
+        count1 += 1;
+        My += 2;
+        Rx -= 0.01;
+        Ry += 0.07;
 
-    if (!isSecondPassed && isReachedSecond) {
-      if (!isTop) {
-        rotationAngle -= 0.03;
-        distance = distance + rotationAngle * 100;
-        X = distance;
-        Y = 0;
-        if (rotationAngle < -0.1) {
-          isTop = true;
+        if (!isSecondPassed) {
+          if (!isTop) {
+            rotationAngle -= 0.03;
+            distance = distance + rotationAngle * 100;
+            X = distance;
+            Y = 0;
+            if (rotationAngle < -0.1) {
+              isTop = true;
+            }
+          } else {
+            count += 1;
+            rotationAngle += 0.03;
+            distance = distance + rotationAngle * 100;
+            Y = 0;
+            if (rotationAngle > -0.03) {
+              isSecondPassed = true;
+              count = 0;
+            }
+          }
+        } else {
+          if (count < 7) {
+            distance = distance - 8;
+            count += 1;
+          }
+          isStopped = true;
         }
-      } else {
-        count += 1;
-        rotationAngle += 0.03;
-        distance = distance + rotationAngle * 100;
-        Y = 0;
-        if (rotationAngle > -0.03) {
-          isSecondPassed = true;
-          count = 0;
-        }
-      }
-    } else {
-      if (count < 7) {
-        distance = distance - 8;
-        count += 1;
-      }
-      isStopped = true;
+      });
+    }
+  }
+
+  void playTruck1() async {
+    while (count1 < 28) {
+      // print('c = $count1');
+      await Future.delayed(const Duration(milliseconds: 100));
+      setState(
+        () {
+          count1 += 1;
+          My += 2;
+          Rx -= 0.01;
+          Ry += 0.07;
+
+          if (!isFirstPassed) {
+            if (!isTop) {
+              rotationAngle += 0.01;
+              distance = -rotationAngle * 100;
+              X = distance;
+              Y = 0;
+              if (rotationAngle > 0.05) {
+                isTop = true;
+              }
+            } else {
+              count += 1;
+              rotationAngle -= 0.01;
+              distance = -rotationAngle * 100 - 0.05 * (count * 100);
+              Y = 0;
+              if (rotationAngle < 0) {
+                isFirstPassed = true;
+                count = 0;
+              }
+            }
+          } else if (!isReachedSecond) {
+            if (count < 7) {
+              distance = distance - 8;
+              count += 1;
+            } else {
+              isReachedSecond = true;
+              isTop = false;
+            }
+          }
+
+          if (!isSecondPassed && isReachedSecond) {
+            if (!isTop) {
+              rotationAngle -= 0.03;
+              distance = distance + rotationAngle * 100;
+              X = distance;
+              Y = 0;
+              if (rotationAngle < -0.1) {
+                isTop = true;
+              }
+            } else {
+              count += 1;
+              rotationAngle += 0.03;
+              distance = distance + rotationAngle * 100;
+              Y = 0;
+              if (rotationAngle > -0.03) {
+                isSecondPassed = true;
+                count = 0;
+              }
+            }
+          } else {
+            if (count < 7) {
+              distance = distance - 8;
+              count += 1;
+            }
+            isStopped = true;
+          }
+        },
+      );
     }
   }
 }
