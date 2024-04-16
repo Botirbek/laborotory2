@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:laborotory2/components/formula_element.dart';
 import 'package:laborotory2/size_config.dart';
 
@@ -33,8 +34,10 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
   bool isFirstPassed = false;
   bool isSecondPassed = false;
   bool isFrintWheel = true;
+  bool isTruck = false;
 
   final List<bool> isSelected = <bool>[true, false];
+  final List<bool> isSelectedVehicleType = <bool>[true, false];
 
   TextEditingController m1 = TextEditingController();
   TextEditingController m2 = TextEditingController();
@@ -124,17 +127,36 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
             ),
           ),
         ),
-        Positioned(
-          top: getConfigHeight(0.1),
-          left: isFrintWheel ? getConfigWidth(0.347) : getConfigWidth(0.265),
-          child: Transform.rotate(
-            angle: rotationAngle,
-            origin: Offset(X, Y),
-            child: Transform.translate(
-                offset: Offset(distance, Y),
-                // Translate vertically
-                child:
-                    Image.asset('assets/truckL.png', width: 200, height: 100)),
+        Visibility(
+          visible: isTruck,
+          child: Positioned(
+            top: getConfigHeight(0.1),
+            left: isFrintWheel ? getConfigWidth(0.347) : getConfigWidth(0.265),
+            child: Transform.rotate(
+              angle: rotationAngle,
+              origin: Offset(X, Y),
+              child: Transform.translate(
+                  offset: Offset(distance, Y),
+                  // Translate vertically
+                  child: Image.asset('assets/truckL.png',
+                      width: 200, height: 100)),
+            ),
+          ),
+        ),
+        Visibility(
+          visible: !isTruck,
+          child: Positioned(
+            top: getConfigHeight(0.11),
+            left: isFrintWheel ? getConfigWidth(0.327) : getConfigWidth(0.250),
+            child: Transform.rotate(
+              angle: rotationAngle,
+              origin: Offset(X, Y),
+              child: Transform.translate(
+                  offset: Offset(distance, Y),
+                  // Translate vertically
+                  child:
+                      Image.asset('assets/car2.png', width: 200, height: 100)),
+            ),
           ),
         ),
         Positioned(
@@ -178,9 +200,9 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
           Row(
             children: [
               SizedBox(
-                width: getConfigWidth(0.18),
+                width: getConfigWidth(0.16),
                 child: const Text(
-                  'To''siqning joylashuvi',
+                  'Avtomobil turi ',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                   ),
@@ -192,16 +214,56 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
                   fillColor: Colors.green,
                   color: Colors.black,
                   constraints: const BoxConstraints(
-                    minHeight: 40.0,
+                    minHeight: 30.0,
+                    minWidth: 80.0,
+                  ),
+                  isSelected: isSelectedVehicleType,
+                  onPressed: (int index) {
+                    setState(() {
+                      isTruck = index == 0;
+                      reset();
+                      for (int i = 0; i < isSelectedVehicleType.length; i++) {
+                        isSelectedVehicleType[i] = i == index;
+                      }
+                    });
+                  },
+                  children: const [
+                    Text(' Yuk moshina '),
+                    Text(' Yengil avtomobil '),
+                  ]),
+            ],
+          ),
+          const SizedBox(
+            height: 12,
+          ),
+          Row(
+            children: [
+              SizedBox(
+                width: getConfigWidth(0.18),
+                child: const Text(
+                  'To' 'siqning joylashuvi',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              ToggleButtons(
+                  borderRadius: const BorderRadius.all(Radius.circular(15)),
+                  selectedColor: Colors.white,
+                  fillColor: Colors.green,
+                  color: Colors.black,
+                  constraints: const BoxConstraints(
+                    minHeight: 30.0,
                     minWidth: 80.0,
                   ),
                   isSelected: isSelected,
                   onPressed: (int index) {
                     setState(() {
-                        isFrintWheel = index == 0;
-                        for (int i = 0; i < isSelected.length; i++) {
-                          isSelected[i] = i == index;
-                        }
+                      isFrintWheel = index == 0;
+                      reset();
+                      for (int i = 0; i < isSelected.length; i++) {
+                        isSelected[i] = i == index;
+                      }
                     });
                   },
                   children: const [
@@ -278,9 +340,11 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
                         .toStringAsFixed(3);
                   });
 
-                  isFrintWheel ? playTruck1() : playTruck2();
-
-                  // controller.forward();
+                  if (isTruck) {
+                    isFrintWheel ? playTruck1() : playTruck2();
+                  } else {
+                    isFrintWheel ? playCar1() : playCar2();
+                  }
                 },
                 style: OutlinedButton.styleFrom(
                   backgroundColor: Colors.green,
@@ -298,26 +362,8 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
                 ),
               ),
               OutlinedButton(
-                onPressed: () async {
-                  // print('pressed');
-                  setState(() {
-                    rotationAngle = 0;
-                    distance = 0;
-                    X = -2;
-                    Y = 1;
-                    Mx = 1;
-                    My = 1;
-                    Rx = 1;
-                    Ry = 1;
-                    count = 0;
-                    count1 = 0;
-                    isTop = false;
-                    isStopped = false;
-                    isReachedSecond = false;
-                    isFirstPassed = false;
-                    isSecondPassed = false;
-                    result = "0";
-                  });
+                onPressed: () {
+                  reset();
                 },
                 style: OutlinedButton.styleFrom(
                   backgroundColor: Colors.orange,
@@ -341,9 +387,99 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
     );
   }
 
-  void playTruck2() async {
-    while (count1 < 10) {
+  void reset() async {
+    setState(() {
+      rotationAngle = 0;
+      distance = 0;
+      X = -2;
+      Y = 1;
+      Mx = 1;
+      My = 1;
+      Rx = 1;
+      Ry = 1;
+      count = 0;
+      count1 = 0;
+      isTop = false;
+      isStopped = false;
+      isReachedSecond = false;
+      isFirstPassed = false;
+      isSecondPassed = false;
+      result = "0";
+    });
+  }
+
+  void playCar1() async {
+    while (count1 < 28) {
       // print('c = $count1');
+      await Future.delayed(const Duration(milliseconds: 100));
+      setState(() {
+          count1 += 1;
+          My += 2;
+          Rx -= 0.01;
+          Ry += 0.07;
+
+          if (!isFirstPassed) {
+            if (!isTop) {
+              rotationAngle += 0.01;
+              distance = -rotationAngle * 100;
+              X = distance;
+              Y = 0;
+              if (rotationAngle > 0.05) {
+                isTop = true;
+              }
+            } else {
+              count += 1;
+              rotationAngle -= 0.01;
+              distance = distance - rotationAngle * 100 ;
+              Y = 0;
+              if (rotationAngle < 0) {
+                isFirstPassed = true;
+                count = 0;
+              }
+            }
+          } else if (!isReachedSecond) {
+            if (count < 7) {
+              distance = distance - 8;
+              count += 1;
+            } else {
+              isReachedSecond = true;
+              isTop = false;
+            }
+          }
+
+          if (!isSecondPassed && isReachedSecond) {
+            if (!isTop) {
+              rotationAngle -= 0.02;
+              distance = distance + rotationAngle * 100;
+              X = distance;
+              Y = 0;
+              if (rotationAngle < -0.1) {
+                isTop = true;
+              }
+            } else {
+              count += 1;
+              rotationAngle += 0.03;
+              distance = distance + rotationAngle * 50;
+              Y = 0;
+              if (rotationAngle > -0.02) {
+                isSecondPassed = true;
+                count = 0;
+              }
+            }
+          } else {
+            if (count < 7) {
+              distance = distance - 8;
+              count += 1;
+            }
+            isStopped = true;
+          }
+        },
+      );
+    }
+  }
+
+  void playCar2() async {
+    while (count1 < 12) {
       await Future.delayed(const Duration(milliseconds: 100));
       setState(() {
         count1 += 1;
@@ -353,8 +489,8 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
 
         if (!isSecondPassed) {
           if (!isTop) {
-            rotationAngle -= 0.03;
-            distance = distance + rotationAngle * 100;
+            rotationAngle -= 0.02;
+            distance = distance + rotationAngle * 50;
             X = distance;
             Y = 0;
             if (rotationAngle < -0.1) {
@@ -363,9 +499,9 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
           } else {
             count += 1;
             rotationAngle += 0.03;
-            distance = distance + rotationAngle * 100;
+            distance = distance + rotationAngle * 50;
             Y = 0;
-            if (rotationAngle > -0.03) {
+            if (rotationAngle > -0.02) {
               isSecondPassed = true;
               count = 0;
             }
@@ -394,8 +530,8 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
 
           if (!isFirstPassed) {
             if (!isTop) {
-              rotationAngle += 0.01;
-              distance = -rotationAngle * 100;
+              rotationAngle += 0.02;
+              distance = -rotationAngle * 50;
               X = distance;
               Y = 0;
               if (rotationAngle > 0.05) {
@@ -404,7 +540,7 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
             } else {
               count += 1;
               rotationAngle -= 0.01;
-              distance = -rotationAngle * 100 - 0.05 * (count * 100);
+              distance = distance - rotationAngle * 50 ;
               Y = 0;
               if (rotationAngle < 0) {
                 isFirstPassed = true;
@@ -424,7 +560,7 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
           if (!isSecondPassed && isReachedSecond) {
             if (!isTop) {
               rotationAngle -= 0.03;
-              distance = distance + rotationAngle * 100;
+              distance = distance + rotationAngle * 150;
               X = distance;
               Y = 0;
               if (rotationAngle < -0.1) {
@@ -449,6 +585,46 @@ class _Lab3PState extends State<Lab3P> with SingleTickerProviderStateMixin {
           }
         },
       );
+    }
+  }
+
+  void playTruck2() async {
+    while (count1 < 10) {
+      // print('c = $count1');
+      await Future.delayed(const Duration(milliseconds: 100));
+      setState(() {
+        count1 += 1;
+        My += 2;
+        Rx -= 0.01;
+        Ry += 0.07;
+
+        if (!isSecondPassed) {
+          if (!isTop) {
+            rotationAngle -= 0.03;
+            distance = distance + rotationAngle * 100;
+            X = distance;
+            Y = 0;
+            if (rotationAngle < -0.1) {
+              isTop = true;
+            }
+          } else {
+            count += 1;
+            rotationAngle += 0.03;
+            distance = distance + rotationAngle * 150;
+            Y = 0;
+            if (rotationAngle > -0.03) {
+              isSecondPassed = true;
+              count = 0;
+            }
+          }
+        } else {
+          if (count < 7) {
+            distance = distance - 8;
+            count += 1;
+          }
+          isStopped = true;
+        }
+      });
     }
   }
 }

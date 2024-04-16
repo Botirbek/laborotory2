@@ -10,7 +10,7 @@ class LabsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: getConfigHeight(0.36),
+      height: getConfigHeight(0.365),
       width: getConfigWidth(0.2),
       decoration: BoxDecoration(
         color: Colors.white,
